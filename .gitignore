@@ -16,4 +16,5 @@ mistralKey.env
 .idea/
 .DS_Store
 
+# Data
 data/
