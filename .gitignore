@@ -8,9 +8,12 @@ __pycache__/
 .pytest_cache/
 
 # Secrets
+mistralKey.env
 .env
 
 # Éditeur / système
 .vscode/
 .idea/
 .DS_Store
+
+data/
