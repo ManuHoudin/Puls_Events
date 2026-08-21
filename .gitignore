@@ -9,6 +9,7 @@ __pycache__/
 
 # Secrets
 mistralKey.env
+.env
 
 # Éditeur / système
 .vscode/
