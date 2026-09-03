@@ -9,7 +9,7 @@ from fastapi import FastAPI, HTTPException
 
 from mistralai.client import Mistral
 from langchain_mistralai import ChatMistralAI
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
 from services.EmbeddingService import EmbeddingService
@@ -78,7 +78,10 @@ rebuild_lock = threading.Lock()
 # ============================================================
 
 class AskRequest(BaseModel):
-    question: str
+    question: str = Field(
+        min_length=1,
+        description="Question à poser au chatbot.",
+    )
 
 
 class AskResponse(BaseModel):

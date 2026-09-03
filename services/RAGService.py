@@ -60,6 +60,8 @@ class RagService:
             de lieu, de date et de catégorie.
 
             6. Réponds de manière claire et concise.
+
+            7. Limite toi à la région Bretagne, en France.
             """,
         )
 
