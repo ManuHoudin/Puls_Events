@@ -33,6 +33,8 @@ class RagService:
 
         self.tool = self._create_tool()
 
+        self.last_documents = []
+
         self.agent = create_agent(
             model=self.llm,
             tools=[self.tool],
@@ -126,6 +128,7 @@ class RagService:
                     """.strip()
                 )
 
+            service.last_documents = documents
             return "\n\n---\n\n".join(
                 resultats
             )
@@ -148,7 +151,40 @@ class RagService:
             }
         )
 
-        return (
-            response["messages"][-1]
-            .content
+        return response["messages"][-1].content
+    
+
+    def ask_with_context(self, question: str,):
+        """
+        Retourne la réponse du chatbot ainsi que
+        les contextes récupérés par FAISS.
+        """
+
+    # Réinitialisation afin de ne pas conserver
+    # les documents d'une question précédente.
+        self.last_documents = []
+
+        response = self.agent.invoke(
+            {
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": question,
+                    }
+                ]
+            }
         )
+
+        answer = response["messages"][-1].content
+
+        contexts = [
+             {
+                "uid": document.metadata["uid"],
+                "title": document.metadata["title"],
+                "content": document.page_content,
+                "score": document.metadata["score_similarite"],
+            }
+            for document in self.last_documents
+        ]
+
+        return answer, contexts
