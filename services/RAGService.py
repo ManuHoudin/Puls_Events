@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 from langchain.agents import create_agent
 from langchain_core.tools import tool
-from langchain_mistralai import ChatMistralAI
+from langchain_ollama import ChatOllama
 
 from dotenv import load_dotenv
 
@@ -23,7 +23,7 @@ class RagService:
         self,
         faiss_repository,
         mistral_client,
-        llm : ChatMistralAI,
+        llm : ChatOllama,
     ):
         self.faiss_repository = faiss_repository
 
@@ -80,6 +80,8 @@ class RagService:
             dans la base FAISS.
             """
 
+            print(">>> TOOL START")
+
             response = (
                 service.mistral_client
                 .embeddings
@@ -106,6 +108,8 @@ class RagService:
                 )
             )
 
+            service.last_documents = documents
+
             if not documents:
                 return (
                     "Aucun événement "
@@ -128,11 +132,12 @@ class RagService:
                     """.strip()
                 )
 
-            service.last_documents = documents
+            
             return "\n\n---\n\n".join(
                 resultats
             )
 
+        print(">>> TOOL END")
         return rechercher_evenements_culturels
 
     def ask(
@@ -140,6 +145,7 @@ class RagService:
         question: str,
     ) -> str:
 
+        print(">>> 1. AVANT INVOKE")
         response = self.agent.invoke(
             {
                 "messages": [
@@ -151,6 +157,8 @@ class RagService:
             }
         )
 
+        print(">>> 2. APRES INVOKE")
+        print(response)
         return response["messages"][-1].content
     
 
