@@ -3,7 +3,8 @@ from __future__ import annotations
 import numpy as np
 from langchain.agents import create_agent
 from langchain_core.tools import tool
-from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
+
 
 from dotenv import load_dotenv
 
@@ -23,7 +24,7 @@ class RagService:
         self,
         faiss_repository,
         mistral_client,
-        llm : ChatOllama,
+        llm : ChatOpenAI,
     ):
         self.faiss_repository = faiss_repository
 
@@ -108,12 +109,16 @@ class RagService:
                 )
             )
 
+            print(
+                ">>> TOOL RESULTS :",
+                [doc.metadata["uid"] for doc in documents]
+            )
+
             service.last_documents = documents
 
             if not documents:
                 return (
-                    "Aucun événement "
-                    "pertinent trouvé."
+                    "Aucun événement pertinent trouvé."
                 )
 
             resultats = []

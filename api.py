@@ -8,7 +8,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 
 from mistralai.client import Mistral
-from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
@@ -32,10 +32,11 @@ app = FastAPI(
 
 
 mistral_client = Mistral()
-llm = ChatOllama(
-    model="qwen3:4b",
+llm = ChatOpenAI(
+    model="qwen3.8-max",
+    api_key=os.environ["DASHSCOPE_API_KEY"],
+    base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
     temperature=0.2,
-    think=False,
 )
 
 openagenda_client = OpenAgendaClient(
