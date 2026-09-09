@@ -7,8 +7,8 @@ from data.evaluation.rag_test_cases import TEST_CASES
 from mistralai.client import Mistral
 from langchain_openai import ChatOpenAI
 
-from services.FaissRepository import FaissRepository
-from services.RAGService import RagService
+from src.services.FaissRepository import FaissRepository
+from src.services.RAGService import RagService
 from ragas.embeddings import BaseRagasEmbeddings
 
 # Création des services nécessaires pour l'évaluation

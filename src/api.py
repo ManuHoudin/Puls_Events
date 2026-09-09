@@ -13,12 +13,12 @@ from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
-from services.EmbeddingService import EmbeddingService
-from services.FaissRepository import FaissRepository
-from services.OpenAgendaClient import OpenAgendaClient
-from services.EventProcessor import EventProcessor
-from services.RAGService import RagService
-from services.RebuildService import RebuildService
+from src.services.EmbeddingService import EmbeddingService
+from src.services.FaissRepository import FaissRepository
+from src.services.OpenAgendaClient import OpenAgendaClient
+from src.services.EventProcessor import EventProcessor
+from src.services.RAGService import RagService
+from src.services.RebuildService import RebuildService
 
 load_dotenv()
 
