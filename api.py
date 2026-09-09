@@ -5,7 +5,8 @@ import threading
 from pathlib import Path
 
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, HTTPException, status, FastAPI
+from fastapi.security import APIKeyHeader
 
 from mistralai.client import Mistral
 from langchain_openai import ChatOpenAI
@@ -30,6 +31,10 @@ app = FastAPI(
     version="1.0.0",
 )
 
+rebuild_api_key = APIKeyHeader(
+    name="X-Rebuild-Key",
+    auto_error=False,
+)
 
 mistral_client = Mistral()
 llm = ChatOpenAI(
@@ -136,9 +141,22 @@ def ask(request: AskRequest):
 # Endpoint /rebuild
 # ============================================================
 
+# Fonction de vérification de la clé API pour l'accès à l'endpoint /rebuild
+async def verify_rebuild_key(
+    api_key: str | None = Depends(rebuild_api_key),
+):
+    expected_key = os.environ["REBUILD_API_KEY"]
+
+    if api_key != expected_key:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès interdit",
+        )
+
 @app.post(
     "/rebuild",
     response_model=RebuildResponse,
+    dependencies=[Depends(verify_rebuild_key)],
 )
 def rebuild():
 
@@ -178,3 +196,5 @@ def rebuild():
     finally:
 
         rebuild_lock.release()
+
+

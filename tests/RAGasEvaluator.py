@@ -16,6 +16,7 @@ from ragas.metrics import (
     ResponseRelevancy,
 )
 
+# Utilisation d'un LLM Qwen3.8 et d'un Embedding Mistral pour l'évaluation faithfulness et response_relevancy
 class MistralRagasEmbeddings(BaseRagasEmbeddings):
 
     def __init__(self, client: Mistral):
@@ -77,6 +78,7 @@ class MistralRagasEmbeddings(BaseRagasEmbeddings):
     ) -> list[list[float]]:
         return self.embed_documents(texts)
 
+# Calcul des 4 métriques RAGAS
 class RAGasEvaluator:
 
     def __init__(self, rag_service):
@@ -134,8 +136,8 @@ class RAGasEvaluator:
         print("Precision :", precision)
         recall = await self.id_recall.single_turn_ascore(sample_ids)
         print("Recall :", recall)
-        # faithfulness = await self.faithfulness.single_turn_ascore(sample_rag)
-        # print("Faithfulness :", faithfulness)
+        faithfulness = await self.faithfulness.single_turn_ascore(sample_rag)
+        print("Faithfulness :", faithfulness)
         response_relevancy = await self.response_relevancy.single_turn_ascore(sample_rag)
         print("Response Relevancy :",response_relevancy)
 
@@ -147,6 +149,6 @@ class RAGasEvaluator:
             # "answer": answer,
             "precision": precision,
             "recall": recall,
-            # "faithfulness": faithfulness,
+            "faithfulness": faithfulness,
             "response_relevancy": response_relevancy,
         }
