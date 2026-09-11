@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+import time
 from langchain.agents import create_agent
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
@@ -82,6 +83,7 @@ class RagService:
             """
 
             print(">>> TOOL START")
+            start_tool = time.perf_counter()
 
             response = (
                 service.mistral_client
@@ -91,6 +93,7 @@ class RagService:
                     inputs=[question],
                 )
             )
+            print(f">>> EMBEDDING : "f"{time.perf_counter() - start_tool:.2f}s")
 
             vecteur = np.asarray(
                 [
@@ -109,40 +112,47 @@ class RagService:
                 )
             )
 
-            print(
-                ">>> TOOL RESULTS :",
-                [doc.metadata["uid"] for doc in documents]
-            )
+            print(f">>> FAISS : "f"{time.perf_counter() - start_tool:.2f}s")
+            # print(">>> TOOL RESULTS :",[doc.metadata["uid"] for doc in documents])
 
             service.last_documents = documents
 
             if not documents:
-                return (
-                    "Aucun événement pertinent trouvé."
-                )
+                return ("Aucun événement pertinent trouvé.")
 
             resultats = []
+            documents_uniques = []
+            uids_vus = set()
 
             for document in documents:
+                uid = document.metadata["uid"]
+                if uid not in uids_vus:
+                    documents_uniques.append(document)
+                    uids_vus.add(uid)
 
-                resultats.append(
-                    f"""
-                    Titre :
-                    {document.metadata["title"]}
+            # For improvement
+           
+            print(documents_uniques[0].metadata)
+            for document in documents_uniques:
+                print(document.page_content[:5000])
+                resultats.append(document.page_content)
 
-                    Score de similarité :
-                    {document.metadata["score_similarite"]:.3f}
-
-                    {document.page_content}
-                    """.strip()
-                )
-
+            #   f"""
+            # resultats.append
+            # Titre :
+            #                     {document.metadata["title"]}
             
+            #                     Score de similarité :
+            #                     {document.metadata["score_similarite"]:.3f}
+            # """.strip()
+
+            print(">>> TOOL END")
+            print(f">>> TOOL END : "f"{time.perf_counter() - start_tool:.2f}s")
             return "\n\n---\n\n".join(
                 resultats
             )
 
-        print(">>> TOOL END")
+            
         return rechercher_evenements_culturels
 
     def ask(
@@ -151,6 +161,7 @@ class RagService:
     ) -> str:
 
         print(">>> 1. AVANT INVOKE")
+        start_agent = time.perf_counter()
         response = self.agent.invoke(
             {
                 "messages": [
@@ -162,11 +173,19 @@ class RagService:
             }
         )
 
+        # For improvement
+        for message in response["messages"]:
+            print(type(message).__name__, getattr(message, "response_metadata", None))
+            print("CONTENT LENGTH :", len(message.content))
+            print("CONTENT :", message.content[:1000])
+            
+
         print(">>> 2. APRES INVOKE")
-        print(response)
+        print(f">>> 2. APRES INVOKE : "f"{time.perf_counter() - start_agent:.2f}s")
+        # print(response)
         return response["messages"][-1].content
     
-
+# Méthode utilisée pour les tests RAGAS
     def ask_with_context(self, question: str,):
         """
         Retourne la réponse du chatbot ainsi que

@@ -17,5 +17,9 @@ Activer le service : `docker compose up`
 
 Lancer l'api en local : `uvicorn src.api:app --reload`
 
-
+# Optimisations
+Optimisation des paramètres du modèle : le mode thinking a été désactivé pour limiter le temps de réponse. Ici il n'est pas nécessaire d'avoir un modèle de raisonnement très poussé.
+Optimisation du volume de données envoyé au LLM pour la formulation de la réponse. Travail sur le compactage des dates.
+On est passé à un format :
+Du 12/06/2026 au 20/12/2026 ; créneaux récurrents : 13:00 - 19:00; 19:00 - 23:00
 

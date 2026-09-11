@@ -38,10 +38,11 @@ rebuild_api_key = APIKeyHeader(
 
 mistral_client = Mistral()
 llm = ChatOpenAI(
-    model="qwen3.8-max",
+    model="qwen3.8-flash",
     api_key=os.environ["DASHSCOPE_API_KEY"],
     base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
     temperature=0.2,
+    extra_body={"enable_thinking": False},
 )
 
 openagenda_client = OpenAgendaClient(
