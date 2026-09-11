@@ -16,6 +16,8 @@ Lancer l'image docker : `docker compose build`
 Activer le service : `docker compose up`
 
 Lancer l'api en local : `uvicorn src.api:app --reload`
+Swagger : http://127.0.0.1:8000/docs
+
 
 # Optimisations
 Optimisation des paramètres du modèle : le mode thinking a été désactivé pour limiter le temps de réponse. Ici il n'est pas nécessaire d'avoir un modèle de raisonnement très poussé.
