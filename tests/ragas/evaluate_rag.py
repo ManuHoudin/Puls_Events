@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 import asyncio
 
-from tests.RAGasEvaluator import RAGasEvaluator
+from tests.ragas.RAGasEvaluator import RAGasEvaluator
 from data.evaluation.rag_test_cases import TEST_CASES
 from mistralai.client import Mistral
 from langchain_openai import ChatOpenAI
