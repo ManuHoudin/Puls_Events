@@ -13,6 +13,28 @@ tests : regroupe les tests unitaires, les tests Ragas, les tests d'API et certai
 
 Enfin il existe un fichier .env avec les clés, et des fichiers docker-compose et Dockerfile pour gérer le container permettant de faire tourner le service en local ou sur un serveur après déploiement.
 
+# Tests
+========================================================================= tests coverage =====================================
+_________________________________________________________ coverage: platform win32, python 3.11.9-final-0 ____________________
+
+Name                               Stmts   Miss  Cover   Missing
+----------------------------------------------------------------
+src\__init__.py                        0      0   100%
+src\api.py                            63     63     0%   1-199
+src\services\EmbeddingService.py      20      0   100%
+src\services\EventProcessor.py        77      8    90%   70, 98, 104, 123, 152, 158, 170, 177
+src\services\FaissRepository.py       69      5    93%   75, 114, 153, 158, 179
+src\services\OpenAgendaClient.py      52      1    98%   157
+src\services\RAGService.py            63      0   100%
+src\services\RebuildService.py        24      0   100%
+src\services\__init__.py               0      0   100%
+----------------------------------------------------------------
+TOTAL                                368     77    79%
+
+# Architecture du Chatbot
+
+![alt text](mermaid-diagram.png)
+
 # Instructions de reproduction
 Construction de l'index Faiss : 
 Lancer le script de construction de l'index : `python -m scripts.build_index`
