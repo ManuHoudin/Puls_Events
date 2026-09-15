@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import numpy as np
+import time
 from langchain.agents import create_agent
 from langchain_core.tools import tool
-from langchain_mistralai import ChatMistralAI
+from langchain_openai import ChatOpenAI
+
 
 from dotenv import load_dotenv
 
@@ -23,7 +25,7 @@ class RagService:
         self,
         faiss_repository,
         mistral_client,
-        llm : ChatMistralAI,
+        llm : ChatOpenAI,
     ):
         self.faiss_repository = faiss_repository
 
@@ -32,6 +34,8 @@ class RagService:
         self.llm = llm
 
         self.tool = self._create_tool()
+
+        self.last_documents = []
 
         self.agent = create_agent(
             model=self.llm,
@@ -78,6 +82,9 @@ class RagService:
             dans la base FAISS.
             """
 
+            print(">>> TOOL START")
+            start_tool = time.perf_counter()
+
             response = (
                 service.mistral_client
                 .embeddings
@@ -86,6 +93,7 @@ class RagService:
                     inputs=[question],
                 )
             )
+            print(f">>> EMBEDDING : "f"{time.perf_counter() - start_tool:.2f}s")
 
             vecteur = np.asarray(
                 [
@@ -104,38 +112,89 @@ class RagService:
                 )
             )
 
+            print(f">>> FAISS : "f"{time.perf_counter() - start_tool:.2f}s")
+            # print(">>> TOOL RESULTS :",[doc.metadata["uid"] for doc in documents])
+
+            service.last_documents = documents
+
             if not documents:
-                return (
-                    "Aucun événement "
-                    "pertinent trouvé."
-                )
+                return ("Aucun événement pertinent trouvé.")
 
             resultats = []
+            documents_uniques = []
+            uids_vus = set()
 
             for document in documents:
+                uid = document.metadata["uid"]
+                if uid not in uids_vus:
+                    documents_uniques.append(document)
+                    uids_vus.add(uid)
 
-                resultats.append(
-                    f"""
-                    Titre :
-                    {document.metadata["title"]}
+            # For improvement
+           
+            print(documents_uniques[0].metadata)
+            for document in documents_uniques:
+                print(document.page_content[:5000])
+                resultats.append(document.page_content)
 
-                    Score de similarité :
-                    {document.metadata["score_similarite"]:.3f}
+            #   f"""
+            # resultats.append
+            # Titre :
+            #                     {document.metadata["title"]}
+            
+            #                     Score de similarité :
+            #                     {document.metadata["score_similarite"]:.3f}
+            # """.strip()
 
-                    {document.page_content}
-                    """.strip()
-                )
-
+            print(">>> TOOL END")
+            print(f">>> TOOL END : "f"{time.perf_counter() - start_tool:.2f}s")
             return "\n\n---\n\n".join(
                 resultats
             )
 
+            
         return rechercher_evenements_culturels
 
     def ask(
         self,
         question: str,
     ) -> str:
+
+        print(">>> 1. AVANT INVOKE")
+        start_agent = time.perf_counter()
+        response = self.agent.invoke(
+            {
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": question,
+                    }
+                ]
+            }
+        )
+
+        # For improvement
+        for message in response["messages"]:
+            print(type(message).__name__, getattr(message, "response_metadata", None))
+            print("CONTENT LENGTH :", len(message.content))
+            print("CONTENT :", message.content[:1000])
+            
+
+        print(">>> 2. APRES INVOKE")
+        print(f">>> 2. APRES INVOKE : "f"{time.perf_counter() - start_agent:.2f}s")
+        # print(response)
+        return response["messages"][-1].content
+    
+# Méthode utilisée pour les tests RAGAS
+    def ask_with_context(self, question: str,):
+        """
+        Retourne la réponse du chatbot ainsi que
+        les contextes récupérés par FAISS.
+        """
+
+    # Réinitialisation afin de ne pas conserver
+    # les documents d'une question précédente.
+        self.last_documents = []
 
         response = self.agent.invoke(
             {
@@ -148,7 +207,16 @@ class RagService:
             }
         )
 
-        return (
-            response["messages"][-1]
-            .content
-        )
+        answer = response["messages"][-1].content
+
+        contexts = [
+             {
+                "uid": document.metadata["uid"],
+                "title": document.metadata["title"],
+                "content": document.page_content,
+                "score": document.metadata["score_similarite"],
+            }
+            for document in self.last_documents
+        ]
+
+        return answer, contexts

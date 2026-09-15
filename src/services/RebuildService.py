@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import pandas as pd
 
-from services.OpenAgendaClient import OpenAgendaClient
-from services.EventProcessor import EventProcessor
-from services.EmbeddingService import EmbeddingService
-from services.FaissRepository import FaissRepository
+from src.services.OpenAgendaClient import OpenAgendaClient
+from src.services.EventProcessor import EventProcessor
+from src.services.EmbeddingService import EmbeddingService
+from src.services.FaissRepository import FaissRepository
 
 
 class RebuildService:

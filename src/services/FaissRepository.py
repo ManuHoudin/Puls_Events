@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+import json
+from datetime import datetime
 
 import faiss
 import numpy as np
@@ -184,6 +186,72 @@ class FaissRepository:
                 .iloc[0]
             )
 
+            timings = json.loads(ligne["timings"])
+
+            horaires = []
+
+            if timings:
+
+                # Cas d'un événement avec beaucoup d'occurrences
+                # et un créneau horaire identique.
+                creneaux = {
+                    (
+                        datetime.fromisoformat(t["begin"]).strftime("%H:%M"),
+                        datetime.fromisoformat(t["end"]).strftime("%H:%M"),
+                    )
+                    for t in timings
+                }
+
+                if len(timings) > 5:
+                    premiere = datetime.fromisoformat(
+                        timings[0]["begin"]
+                    )
+
+                    derniere = datetime.fromisoformat(
+                        timings[-1]["begin"]
+                    )
+
+                    creneaux = sorted(
+                        {
+                            (
+                                datetime.fromisoformat(
+                                    t["begin"]
+                                ).strftime("%H:%M"),
+                                datetime.fromisoformat(
+                                    t["end"]
+                                ).strftime("%H:%M"),
+                            )
+                            for t in timings
+                        }
+                    )
+
+                    horaires.append(
+                        f"Du {premiere.strftime('%d/%m/%Y')} "
+                        f"au {derniere.strftime('%d/%m/%Y')} ; "
+                        f"créneaux récurrents : "
+                        + "; ".join(
+                            f"{debut} - {fin}"
+                            for debut, fin in creneaux
+                        )
+                    )
+
+                else:
+
+                    for timing in timings:
+
+                        debut = datetime.fromisoformat(
+                            timing["begin"]
+                        )
+
+                        fin = datetime.fromisoformat(
+                            timing["end"]
+                        )
+
+                        horaires.append(
+                            f"{debut.strftime('%d/%m/%Y %H:%M')} - "
+                            f"{fin.strftime('%H:%M')}"
+                        )
+            
             contenu = f"""
 Titre : {ligne["title"]}
 
@@ -191,7 +259,7 @@ Description :
 {ligne["texte_chunk"]}
 
 Horaires :
-{ligne["timings"]}
+{"; ".join(horaires)}
 
 Lieu :
 {ligne["location.name"]}

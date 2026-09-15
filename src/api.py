@@ -5,19 +5,20 @@ import threading
 from pathlib import Path
 
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, HTTPException, status, FastAPI
+from fastapi.security import APIKeyHeader
 
 from mistralai.client import Mistral
-from langchain_mistralai import ChatMistralAI
+from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
-from services.EmbeddingService import EmbeddingService
-from services.FaissRepository import FaissRepository
-from services.OpenAgendaClient import OpenAgendaClient
-from services.EventProcessor import EventProcessor
-from services.RAGService import RagService
-from services.RebuildService import RebuildService
+from src.services.EmbeddingService import EmbeddingService
+from src.services.FaissRepository import FaissRepository
+from src.services.OpenAgendaClient import OpenAgendaClient
+from src.services.EventProcessor import EventProcessor
+from src.services.RAGService import RagService
+from src.services.RebuildService import RebuildService
 
 load_dotenv()
 
@@ -30,14 +31,19 @@ app = FastAPI(
     version="1.0.0",
 )
 
+rebuild_api_key = APIKeyHeader(
+    name="X-Rebuild-Key",
+    auto_error=False,
+)
 
 mistral_client = Mistral()
-llm = ChatMistralAI(
-            model_name="mistral-small-latest",
-            temperature=0.2,
-            timeout=10,
-            max_retries=0,
-        )
+llm = ChatOpenAI(
+    model="qwen3.8-flash",
+    api_key=os.environ["DASHSCOPE_API_KEY"],
+    base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+    temperature=0.2,
+    extra_body={"enable_thinking": False},
+)
 
 openagenda_client = OpenAgendaClient(
     api_key=os.environ["OPENAGENDA_API_KEY"],
@@ -136,9 +142,22 @@ def ask(request: AskRequest):
 # Endpoint /rebuild
 # ============================================================
 
+# Fonction de vérification de la clé API pour l'accès à l'endpoint /rebuild
+async def verify_rebuild_key(
+    api_key: str | None = Depends(rebuild_api_key),
+):
+    expected_key = os.environ["REBUILD_API_KEY"]
+
+    if api_key != expected_key:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès interdit",
+        )
+
 @app.post(
     "/rebuild",
     response_model=RebuildResponse,
+    dependencies=[Depends(verify_rebuild_key)],
 )
 def rebuild():
 
@@ -178,3 +197,5 @@ def rebuild():
     finally:
 
         rebuild_lock.release()
+
+
