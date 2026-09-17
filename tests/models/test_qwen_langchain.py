@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Teste si Qwen fonctionne avec LangChain en utilisant l'API Dashscope
 
 llm = ChatOpenAI(
     model="qwen3.8-max",

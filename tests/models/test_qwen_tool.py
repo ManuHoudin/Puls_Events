@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
+# Teste si Qwen appelle bien le tool Faiss pour récupérer les événements culturels
 llm = ChatOpenAI(
     model="qwen3.8-max",
     api_key=os.environ["DASHSCOPE_API_KEY"],
