@@ -7,6 +7,7 @@ from pathlib import Path
 
 from fastapi import Depends, HTTPException, status, FastAPI
 from fastapi.security import APIKeyHeader
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
 
 from mistralai.client import Mistral
 from langchain_openai import ChatOpenAI
@@ -115,22 +116,33 @@ def root():
 # Endpoint /ask
 # ============================================================
 
-@app.post("/ask", response_model=AskResponse,
-)
-def ask(request: AskRequest):
+@app.post("/ask", response_model=AskResponse,)
+def ask(request: AskRequest): 
+    executor = ThreadPoolExecutor(max_workers=1)
+
+    future = executor.submit(
+        rag_service.ask,
+        request.question,
+    )
+
 
     try:
+        answer = future.result(timeout=10)
+        executor.shutdown(wait=False)
+        return AskResponse(answer=answer, question=request.question)
 
-        with rebuild_lock:
-
-            answer = rag_service.ask(request.question)
-
+    except TimeoutError:
+        executor.shutdown(wait=False)
         return AskResponse(
-            question=request.question,
-            answer=answer,
+            answer= (
+                "Désolé le serveur ne répond pas, veuillez reformuler "
+                "votre question ou réessayer plus tard"
+            ), question=request.question
         )
 
     except Exception as exc:
+
+        executor.shutdown(wait=False)
 
         raise HTTPException(
             status_code=500,

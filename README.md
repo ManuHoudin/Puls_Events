@@ -14,22 +14,14 @@ tests : regroupe les tests unitaires, les tests Ragas, les tests d'API et certai
 Enfin il existe un fichier .env avec les clés, et des fichiers docker-compose et Dockerfile pour gérer le container permettant de faire tourner le service en local ou sur un serveur après déploiement.
 
 # Tests
-========================================================================= tests coverage =====================================
-_________________________________________________________ coverage: platform win32, python 3.11.9-final-0 ____________________
+Pour exécuter les tests : `pytest tests/unitaires`
+Pour lancer la couverture de test : `pytest tests/unitaires --cov=src --cov-report=term-missing`
+- unitaires : teste tous les services liés à l'api
+- intégration : tests les fonctionnalités de l'api de bout en bout
+- models : teste l'appel au modèle LLM selon différents cas
+- ragas : teste la qualité du chatbot par rapport à des tests annotés
 
-Name                               Stmts   Miss  Cover   Missing
-----------------------------------------------------------------
-src\__init__.py                        0      0   100%
-src\api.py                            63     63     0%   1-199
-src\services\EmbeddingService.py      20      0   100%
-src\services\EventProcessor.py        77      8    90%   70, 98, 104, 123, 152, 158, 170, 177
-src\services\FaissRepository.py       69      5    93%   75, 114, 153, 158, 179
-src\services\OpenAgendaClient.py      52      1    98%   157
-src\services\RAGService.py            63      0   100%
-src\services\RebuildService.py        24      0   100%
-src\services\__init__.py               0      0   100%
-----------------------------------------------------------------
-TOTAL                                368     77    79%
+![alt text](tests/coverage-TU.png)
 
 # Architecture du Chatbot
 
@@ -47,6 +39,10 @@ Activer le service : `docker compose up`
 Lancer l'api en local : `uvicorn src.api:app --reload`
 Swagger : http://127.0.0.1:8000/docs
 
+Exemples de requêtes :
+- simple et rapide (en principe) : Quels sont les événements à Vannes ?
+- compliquée (déclenche un timeout 10s) : Quels sont les événements à Rennes ce week-end et aussi les sorties de cinéma à Ploermel mercredi prochain ?
+- hors périmètre : Quels sont les événements sportifs prévus à Reykjavik ?
 
 # Optimisations
 Optimisation des paramètres du modèle : le mode thinking a été désactivé pour limiter le temps de réponse. Ici il n'est pas nécessaire d'avoir un modèle de raisonnement très poussé.

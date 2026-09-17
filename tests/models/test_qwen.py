@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Teste si l'appel simple à Qwen fonctionne avec l'API Dashscope
 client = OpenAI(
     api_key=os.environ["DASHSCOPE_API_KEY"],
     base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
