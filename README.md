@@ -32,11 +32,11 @@ Construction de l'index Faiss :
 Lancer le script de construction de l'index : `python -m scripts.build_index`
 
 Lancement de l'API dans une image docker en local :
-Lancer le moteur avec Docker Desktop
-Lancer l'image docker : `docker compose build`
+Créer l'image docker : `docker compose build`
+Lancer le moteur avec Docker Desktop ou
 Activer le service : `docker compose up`
 
-Lancer l'api en local : `uvicorn src.api:app --reload`
+Lancer l'api en local (hors image Docker) : `uvicorn src.api:app --reload`
 Swagger : http://127.0.0.1:8000/docs
 
 Exemples de requêtes :
